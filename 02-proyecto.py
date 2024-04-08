@@ -56,9 +56,31 @@ def añadir_tareas(lista):
 
     lista.append(tarea)
 
-def mostrar_tareas(lista, status):
-       resultado = list(filter(lambda tarea: True if tarea["Status"] == status else False, lista))
-       return resultado
+def mostrar_tareas(lista, status=None, filtro=None, valor=None):
+    print("Codigo |  Titulo  |    Descripcion    |  Status  |  Fecha ")
+
+    if filtro == "Fecha":
+        for tarea in lista:
+            if tarea["Fecha"].date() == valor.date():
+                fecha_str = tarea["Fecha"].strftime("%d-%m-%Y")
+                print(f'   {tarea["Codigo"]} | {tarea["Titulo"]} | {tarea["Descripcion"]} | {tarea["Status"]} | {fecha_str}')
+                print()
+
+    elif filtro:
+        for tarea in lista:
+            if filtro in ["Codigo", "Titulo", "Descripcion", "Status"]:
+                if str(tarea[filtro]).lower().startswith(str(valor).lower()):
+                    fecha_str = tarea["Fecha"].strftime("%d-%m-%Y") if isinstance(tarea["Fecha"], datetime) else tarea["Fecha"]
+                    print(f'   {tarea["Codigo"]} | {tarea["Titulo"]} | {tarea["Descripcion"]} | {tarea["Status"]} | {fecha_str}')
+                    print()
+
+    elif status:
+        resultado = list(filter(lambda tarea: tarea["Status"] == status, lista))
+        for tarea in resultado:
+            fecha_str = tarea["Fecha"].strftime("%d-%m-%Y") if isinstance(tarea["Fecha"], datetime) else tarea["Fecha"]
+            print(f'   {tarea["Codigo"]} | {tarea["Titulo"]} | {tarea["Descripcion"]} | {tarea["Status"]} | {fecha_str}')
+            print()
+
 
 def actualizar_tarea(lista, codigo):
      for tarea in lista:
@@ -159,13 +181,11 @@ def menu(lista):
                                          """))
                 if opcion_lista.title() in ["Completadas", "1"]:
                     status = "Completado"
-                    tareas_completadas = mostrar_tareas(lista, status)
-                    print(tareas_completadas)
+                    mostrar_tareas(lista, status=status)
                 
                 elif opcion_lista.title() in ["Pendientes", "2"]:
                     status = "Pendiente"
-                    tareas_pendientes = mostrar_tareas(lista, status)
-                    print(tareas_pendientes)
+                    mostrar_tareas(lista, status=status)
 
                 elif opcion_lista.title() in ["Atras", "3"]:
                     break
@@ -188,7 +208,7 @@ def menu(lista):
                         codigo = int(input("Ingresa el codigo de la tarea que deseas filtrar: "))
                         resultado = list(filter(lambda tarea: True if tarea["Codigo"] == codigo else False, lista))
                         if resultado:
-                            print(resultado)
+                            mostrar_tareas(lista, filtro="Codigo", valor=codigo)
                         else:
                             print("La tarea con el código indicado no existe. Intenta de nuevo.")
                         break
@@ -202,7 +222,7 @@ def menu(lista):
                 else:
                     resultado = list(filter(lambda tarea: tarea["Titulo"].lower().startswith(titulo.lower()), lista))
                 if resultado:
-                    print(resultado)
+                    mostrar_tareas(resultado, filtro="Titulo", valor=titulo)
                 else:
                     print("La tarea con el título indicado no existe. Intenta de nuevo.")
 
@@ -210,10 +230,10 @@ def menu(lista):
                 while True:
                     fecha_entrada = input("Ingresa la fecha en formato DD-MM-YYYY: ")
                     try:
-                        fecha = datetime.strptime(fecha_entrada, "%d-%m-%Y").date()
-                        resultado = list(filter(lambda tarea: datetime.strptime(tarea["Fecha"], "%d-%m-%Y").date() == fecha, lista))
+                        fecha = datetime.strptime(fecha_entrada, "%d-%m-%Y")
+                        resultado = list(filter(lambda tarea: tarea["Fecha"] == fecha, lista))
                         if resultado:
-                            print(resultado)
+                            mostrar_tareas(lista, filtro="Fecha", valor=fecha)
                         else:
                             print("La tarea con la fecha indicada no existe. Intenta de nuevo.")
                         break
